@@ -1,0 +1,6 @@
+name: Wildlife
+version: '${version}'
+main: com.dansplugins.wildlife.Wildlife
+api-version: '1.16'
+authors: ["Daniel McCoy Stephenson"]
+description: Populates the world with new wild animals built from vanilla mobs
