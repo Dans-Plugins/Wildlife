@@ -10,7 +10,7 @@ This plugin was proposed from a Kingdom: First Era player request on 2026-09-04.
 
 ## Project Status
 
-**Pre-implementation.** No code yet. The scope of the first release is defined in [MVP.md](MVP.md) — and the honest limits of the approach are documented there. Read them before promising anyone a shark.
+**Pre-implementation.** The repository holds a buildable plugin skeleton with no features yet. The scope of the first release is defined in [MVP.md](MVP.md) — and the honest limits of the approach are documented there. Read them before promising anyone a shark.
 
 ## Planned Features
 
@@ -21,7 +21,7 @@ This plugin was proposed from a Kingdom: First Era player request on 2026-09-04.
 
 ## Installation
 
-Not yet released. Once there is a build, installation will follow the usual DPC pattern: drop the jar in `plugins/` and restart. It will also be available through [Dan's Plugin Manager](https://github.com/Dans-Plugins/Dans-Plugin-Manager).
+Not yet released. Once there is a release, installation will follow the usual DPC pattern: drop the jar in `plugins/` and restart. It will also be available through [Dan's Plugin Manager](https://github.com/Dans-Plugins/Dans-Plugin-Manager).
 
 ### Dependencies
 
@@ -45,7 +45,7 @@ Please fill out a bug report [here](https://github.com/Dans-Plugins/Wildlife/iss
 
 ## Contributing
 
-This repository follows the standards in [dpc-conventions](https://github.com/Dans-Plugins/dpc-conventions). `CONTRIBUTING.md` arrives with the build tooling.
+This repository follows the standards in [dpc-conventions](https://github.com/Dans-Plugins/dpc-conventions). `CONTRIBUTING.md` is not written yet; until it is, build and test with `./gradlew clean build` on JDK 21 (the jar is written to `build/libs/`).
 
 ## License
 
