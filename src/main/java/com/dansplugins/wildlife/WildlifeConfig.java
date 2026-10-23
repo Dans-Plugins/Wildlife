@@ -53,7 +53,8 @@ public final class WildlifeConfig {
 
     private static AnimalSettings parseAnimal(String id, ConfigurationSection section) {
         boolean enabled = section.getBoolean("enabled", DEFAULT_ENABLED);
-        double spawnChance = Math.max(0.0, Math.min(1.0, section.getDouble("spawn-chance", DEFAULT_SPAWN_CHANCE)));
+        double spawnChance = section.getDouble("spawn-chance", DEFAULT_SPAWN_CHANCE);
+        spawnChance = Double.isNaN(spawnChance) ? DEFAULT_SPAWN_CHANCE : Math.max(0.0, Math.min(1.0, spawnChance));
         List<String> biomes = new ArrayList<>();
         for (String biome : section.getStringList("biomes")) {
             String key = normalizeKey(biome);

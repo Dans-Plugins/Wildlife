@@ -85,6 +85,20 @@ class WildlifeConfigTest {
     }
 
     @Test
+    void nonNumericSpawnChanceFallsBackToDefault() throws InvalidConfigurationException {
+        WildlifeConfig config = parse("""
+                animals:
+                  deer:
+                    spawn-chance: .nan
+                  boar:
+                    spawn-chance: often
+                """);
+
+        assertEquals(WildlifeConfig.DEFAULT_SPAWN_CHANCE, config.getAnimal("deer").orElseThrow().spawnChance());
+        assertEquals(WildlifeConfig.DEFAULT_SPAWN_CHANCE, config.getAnimal("boar").orElseThrow().spawnChance());
+    }
+
+    @Test
     void biomeAndAnimalKeysAreNormalized() throws InvalidConfigurationException {
         WildlifeConfig config = parse("""
                 animals:
