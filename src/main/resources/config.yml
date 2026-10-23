@@ -1,0 +1,22 @@
+# Wildlife configuration. Every key is documented in CONFIG.md.
+
+# Worlds in which the whole roster is turned off. World names are case-sensitive.
+disabled-worlds: []
+
+animals:
+  deer:
+    enabled: true
+    spawn-chance: 0.05
+    biomes: [forest, birch_forest, taiga, meadow]
+  boar:
+    enabled: true
+    spawn-chance: 0.05
+    biomes: [forest, dark_forest, taiga]
+  duck:
+    enabled: true
+    spawn-chance: 0.05
+    biomes: [river, swamp, mangrove_swamp]
+  crow:
+    enabled: true
+    spawn-chance: 0.05
+    biomes: [plains, forest, dark_forest]
