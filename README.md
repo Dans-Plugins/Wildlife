@@ -10,7 +10,7 @@ This plugin was proposed from a Kingdom: First Era player request on 2026-09-04.
 
 ## Project Status
 
-**Pre-implementation.** The repository holds a buildable plugin skeleton with no features yet. The scope of the first release is defined in [MVP.md](MVP.md) — and the honest limits of the approach are documented there. Read them before promising anyone a shark.
+**Pre-implementation.** The repository holds a buildable plugin that loads its [configuration](CONFIG.md) but has no gameplay features yet. The scope of the first release is defined in [MVP.md](MVP.md) — and the honest limits of the approach are documented there. Read them before promising anyone a shark.
 
 ## Planned Features
 
@@ -32,8 +32,10 @@ None. Coexists with [Wild Pets](https://github.com/Dans-Plugins/Wild-Pets), whic
 ### Documentation
 
 - [MVP](MVP.md) – Scope of the first release, and its deliberate non-goals
+- [Configuration](CONFIG.md) – Every `config.yml` key and its default
+- [Changelog](CHANGELOG.md) – User-visible changes
 
-`USER_GUIDE.md`, `COMMANDS.md`, `CONFIG.md` and `CHANGELOG.md` land with the first release, per [DOCUMENTATION_PRACTICES.md](https://github.com/Dans-Plugins/dpc-conventions/blob/main/docs/DOCUMENTATION_PRACTICES.md).
+`USER_GUIDE.md` and `COMMANDS.md` land with the first release, per [DOCUMENTATION_PRACTICES.md](https://github.com/Dans-Plugins/dpc-conventions/blob/main/docs/DOCUMENTATION_PRACTICES.md).
 
 ## Support
 
