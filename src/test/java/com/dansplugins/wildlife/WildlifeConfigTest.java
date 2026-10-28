@@ -8,7 +8,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,6 +44,71 @@ class WildlifeConfigTest {
             }
             assertTrue(parsed.getDisabledWorlds().isEmpty());
         }
+    }
+
+    @Test
+    void configMdShippedDefaultsMatchDefaultConfig() throws IOException, InvalidConfigurationException {
+        WildlifeConfig parsed;
+        try (InputStream in = getClass().getClassLoader().getResourceAsStream("config.yml")) {
+            assertNotNull(in, "config.yml must be on the classpath");
+            YamlConfiguration config = new YamlConfiguration();
+            config.load(new InputStreamReader(in, StandardCharsets.UTF_8));
+            parsed = WildlifeConfig.from(config);
+        }
+
+        List<List<String>> rows = configMdTable("## Shipped defaults");
+        List<String> documentedIds = new ArrayList<>();
+        for (List<String> row : rows) {
+            String id = row.get(0);
+            documentedIds.add(id);
+            AnimalSettings animal = parsed.getAnimal(id).orElseThrow(() -> new AssertionError("not in config.yml: " + id));
+            assertEquals(Double.parseDouble(row.get(1)), animal.spawnChance(), id);
+            assertEquals(List.of(row.get(2).split(",\\s*")), animal.biomes(), id);
+        }
+        assertEquals(List.copyOf(parsed.getAnimals().keySet()), documentedIds);
+    }
+
+    @Test
+    void configMdPerAnimalDefaultsMatchCode() throws IOException {
+        Map<String, String> defaults = new HashMap<>();
+        for (List<String> row : configMdTable("## Per-animal keys")) {
+            defaults.put(row.get(0), row.get(2));
+        }
+
+        assertEquals(Set.of("enabled", "spawn-chance", "biomes"), defaults.keySet());
+        assertEquals(WildlifeConfig.DEFAULT_ENABLED, Boolean.parseBoolean(defaults.get("enabled")));
+        assertEquals(WildlifeConfig.DEFAULT_SPAWN_CHANCE, Double.parseDouble(defaults.get("spawn-chance")));
+        assertEquals("[]", defaults.get("biomes"));
+    }
+
+    /**
+     * Returns the body rows of the first Markdown table under the given CONFIG.md heading, with each cell
+     * trimmed and stripped of backticks.
+     */
+    private static List<List<String>> configMdTable(String heading) throws IOException {
+        List<String> lines = Files.readAllLines(Path.of("CONFIG.md"), StandardCharsets.UTF_8);
+        int start = 0;
+        while (start < lines.size() && !lines.get(start).startsWith(heading)) {
+            start++;
+        }
+        assertTrue(start < lines.size(), "CONFIG.md has no heading " + heading);
+        List<List<String>> rows = new ArrayList<>();
+        boolean inTable = false;
+        for (String line : lines.subList(start + 1, lines.size())) {
+            if (line.startsWith("|")) {
+                inTable = true;
+                List<String> cells = new ArrayList<>();
+                for (String cell : line.substring(1, line.lastIndexOf('|')).split("\\|")) {
+                    cells.add(cell.replace("`", "").trim());
+                }
+                rows.add(cells);
+            } else if (inTable || line.startsWith("#")) {
+                break;
+            }
+        }
+        assertTrue(rows.size() > 2, "CONFIG.md table under " + heading + " has no body rows");
+        // Drop the header row and the |---| separator.
+        return rows.subList(2, rows.size());
     }
 
     @Test
