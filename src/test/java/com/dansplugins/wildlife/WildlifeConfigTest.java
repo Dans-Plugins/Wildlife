@@ -1,5 +1,6 @@
 package com.dansplugins.wildlife;
 
+import org.bukkit.block.Biome;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.junit.jupiter.api.Test;
@@ -13,9 +14,11 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -47,7 +50,27 @@ class WildlifeConfigTest {
     }
 
     @Test
-    void configMdShippedDefaultsMatchDefaultConfig() throws IOException, InvalidConfigurationException {
+    void defaultConfigBiomesExistInBukkitApi() throws IOException, InvalidConfigurationException {
+        try (InputStream in = getClass().getClassLoader().getResourceAsStream("config.yml")) {
+            assertNotNull(in, "config.yml must be on the classpath");
+            YamlConfiguration config = new YamlConfiguration();
+            config.load(new InputStreamReader(in, StandardCharsets.UTF_8));
+            WildlifeConfig parsed = WildlifeConfig.from(config);
+
+            // getField only looks up the constant; it does not initialise Biome, which needs a running server
+            // on versions where Biome is registry-backed.
+            for (AnimalSettings animal : parsed.getAnimals().values()) {
+                for (String biome : animal.biomes()) {
+                    String constant = biome.toUpperCase(Locale.ROOT);
+                    assertDoesNotThrow(() -> Biome.class.getField(constant),
+                            animal.id() + " lists a biome the Bukkit API does not define: " + biome);
+                }
+            }
+        }
+    }
+
+    @Test
+    void configMdShippedDefaultsMatchDefaultConfig()throws IOException, InvalidConfigurationException {
         WildlifeConfig parsed;
         try (InputStream in = getClass().getClassLoader().getResourceAsStream("config.yml")) {
             assertNotNull(in, "config.yml must be on the classpath");
