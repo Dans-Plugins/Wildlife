@@ -30,8 +30,8 @@ public final class WildlifeConfig {
     }
 
     /**
-     * Parses the configuration. Missing keys fall back to their defaults, and a spawn chance outside
-     * [0.0, 1.0] is clamped into that range.
+     * Parses the configuration. Missing keys fall back to their defaults, a spawn chance outside
+     * [0.0, 1.0] is clamped into that range, and a list key given as a single string is read as one entry.
      */
     public static WildlifeConfig from(ConfigurationSection config) {
         Map<String, AnimalSettings> animals = new LinkedHashMap<>();
@@ -47,7 +47,7 @@ public final class WildlifeConfig {
             }
         }
         // World names are case-sensitive in Bukkit, so they are kept as written.
-        Set<String> disabledWorlds = new LinkedHashSet<>(config.getStringList("disabled-worlds"));
+        Set<String> disabledWorlds = new LinkedHashSet<>(readStringList(config, "disabled-worlds"));
         return new WildlifeConfig(animals, disabledWorlds);
     }
 
@@ -56,13 +56,21 @@ public final class WildlifeConfig {
         double spawnChance = section.getDouble("spawn-chance", DEFAULT_SPAWN_CHANCE);
         spawnChance = Double.isNaN(spawnChance) ? DEFAULT_SPAWN_CHANCE : Math.max(0.0, Math.min(1.0, spawnChance));
         List<String> biomes = new ArrayList<>();
-        for (String biome : section.getStringList("biomes")) {
+        for (String biome : readStringList(section, "biomes")) {
             String key = normalizeKey(biome);
             if (!key.isEmpty() && !biomes.contains(key)) {
                 biomes.add(key);
             }
         }
         return new AnimalSettings(id, enabled, spawnChance, biomes);
+    }
+
+    /**
+     * Reads a list key, treating a single string as a one-entry list. {@code getStringList} alone returns an
+     * empty list for {@code disabled-worlds: world_nether}, which would silently leave the roster on there.
+     */
+    private static List<String> readStringList(ConfigurationSection section, String key) {
+        return section.isString(key) ? List.of(section.getString(key)) : section.getStringList(key);
     }
 
     /** Lower-cases a key and strips a leading {@code minecraft:} namespace. */
