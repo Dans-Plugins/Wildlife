@@ -247,6 +247,33 @@ class WildlifeConfigTest {
     }
 
     @Test
+    void singleWorldNameWithoutListBracketsIsDisabled() throws InvalidConfigurationException {
+        WildlifeConfig config = parse("""
+                disabled-worlds: world_nether
+                animals:
+                  deer:
+                    enabled: true
+                """);
+
+        assertEquals(Set.of("world_nether"), config.getDisabledWorlds());
+        assertFalse(config.isActive("deer", "world_nether"));
+        assertTrue(config.isActive("deer", "world"));
+    }
+
+    @Test
+    void singleBiomeWithoutListBracketsIsRead() throws InvalidConfigurationException {
+        WildlifeConfig config = parse("""
+                animals:
+                  duck:
+                    biomes: "minecraft:RIVER"
+                """);
+
+        AnimalSettings duck = config.getAnimal("duck").orElseThrow();
+        assertEquals(List.of("river"), duck.biomes());
+        assertTrue(duck.spawnsIn("river"));
+    }
+
+    @Test
     void emptyConfigHasNoAnimals() throws InvalidConfigurationException {
         WildlifeConfig config = parse("");
 
