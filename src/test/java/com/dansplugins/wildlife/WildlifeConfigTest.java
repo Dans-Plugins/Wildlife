@@ -273,6 +273,70 @@ class WildlifeConfigTest {
         assertTrue(duck.spawnsIn("river"));
     }
 
+    /**
+     * Parses {@code liveYaml} with a jar config installed as its defaults, the way {@code JavaPlugin.getConfig()}
+     * hands config.yml to {@link WildlifeConfig#from}. The jar values differ from the code's defaults so that a
+     * read through to the jar is visible; the shipped values cannot show that, because they equal the code's.
+     */
+    private static WildlifeConfig parseOverJarDefaults(String liveYaml) throws InvalidConfigurationException {
+        YamlConfiguration jar = new YamlConfiguration();
+        jar.loadFromString("""
+                animals:
+                  deer:
+                    enabled: false
+                    spawn-chance: 0.9
+                  crow:
+                    enabled: true
+                    spawn-chance: 0.9
+                """);
+        YamlConfiguration live = new YamlConfiguration();
+        live.loadFromString(liveYaml);
+        live.setDefaults(jar);
+        return WildlifeConfig.from(live);
+    }
+
+    @Test
+    void missingEnabledUsesCodeDefaultOverJarValue() throws InvalidConfigurationException {
+        WildlifeConfig config = parseOverJarDefaults("""
+                animals:
+                  deer:
+                    spawn-chance: 0.25
+                """);
+
+        assertEquals(WildlifeConfig.DEFAULT_ENABLED, config.getAnimal("deer").orElseThrow().enabled());
+    }
+
+    @Test
+    void missingSpawnChanceUsesCodeDefaultOverJarValue() throws InvalidConfigurationException {
+        WildlifeConfig config = parseOverJarDefaults("""
+                animals:
+                  deer:
+                    enabled: true
+                """);
+
+        assertEquals(WildlifeConfig.DEFAULT_SPAWN_CHANCE, config.getAnimal("deer").orElseThrow().spawnChance());
+    }
+
+    @Test
+    void animalSectionDeletedFromLiveConfigIsNotActive() throws InvalidConfigurationException {
+        WildlifeConfig config = parseOverJarDefaults("""
+                animals:
+                  deer:
+                    enabled: true
+                """);
+
+        assertEquals(Set.of("deer"), config.getAnimals().keySet());
+        assertFalse(config.isActive("crow", "world"));
+    }
+
+    @Test
+    void animalsKeyDeletedFromLiveConfigLeavesNoAnimals() throws InvalidConfigurationException {
+        WildlifeConfig config = parseOverJarDefaults("");
+
+        assertTrue(config.getAnimals().isEmpty());
+        assertFalse(config.isActive("crow", "world"));
+    }
+
     @Test
     void emptyConfigHasNoAnimals() throws InvalidConfigurationException {
         WildlifeConfig config = parse("");
