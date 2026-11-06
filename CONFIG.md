@@ -8,14 +8,14 @@ Wildlife writes `plugins/Wildlife/config.yml` on first start. Changes take effec
 
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `disabled-worlds` | list of world names | `[]` | Worlds in which the whole roster is turned off. World names are case-sensitive and must match the folder name exactly. A single world name without list brackets is read as a one-entry list. |
+| `disabled-worlds` | list of world names | `[]` | Worlds in which the whole roster is turned off. World names are case-sensitive and must match the folder name exactly. A single world name without list brackets is read as a one-entry list. Quote a name that YAML would not read as text, such as `"1.20"` or `"off"`. |
 | `animals` | section | see below | One sub-section per animal, keyed by the animal's id. An animal with no section is not active. |
 
 ## Per-animal keys (`animals.<id>`)
 
 | Key | Type | Default if missing | Description |
 |---|---|---|---|
-| `enabled` | boolean | `true` | Whether the animal is active at all. |
+| `enabled` | boolean | `true` | Whether the animal is active at all. A value that is not a boolean, including a quoted `"false"`, falls back to the default. |
 | `spawn-chance` | number, 0.0–1.0 | `0.05` | Probability used by natural spawning. Values outside 0.0–1.0 are clamped into that range; a value that is not a number falls back to the default. |
 | `biomes` | list of biome keys | `[]` | Biomes the animal spawns in naturally, e.g. `forest`. Matching ignores case and an optional `minecraft:` prefix; duplicates and blank entries are dropped. A single biome key without list brackets is read as a one-entry list. Use biome keys that exist on your server version. |
 

@@ -273,6 +273,60 @@ class WildlifeConfigTest {
         assertTrue(duck.spawnsIn("river"));
     }
 
+    @Test
+    void singleNumericWorldNameWithoutListBracketsIsDisabled() throws InvalidConfigurationException {
+        WildlifeConfig config = parse("""
+                disabled-worlds: 2024
+                animals:
+                  deer:
+                    enabled: true
+                """);
+
+        assertEquals(Set.of("2024"), config.getDisabledWorlds());
+        assertFalse(config.isActive("deer", "2024"));
+        assertTrue(config.isActive("deer", "world"));
+    }
+
+    @Test
+    void numericWorldNameReadsTheSameWithAndWithoutListBrackets() throws InvalidConfigurationException {
+        assertEquals(parse("disabled-worlds: [2024]").getDisabledWorlds(),
+                parse("disabled-worlds: 2024").getDisabledWorlds());
+    }
+
+    @Test
+    void singleNumericBiomeWithoutListBracketsIsRead() throws InvalidConfigurationException {
+        WildlifeConfig config = parse("""
+                animals:
+                  duck:
+                    biomes: 7
+                """);
+
+        assertEquals(List.of("7"), config.getAnimal("duck").orElseThrow().biomes());
+    }
+
+    @Test
+    void worldNamesYamlDoesNotReadAsTextNeedQuotes() throws InvalidConfigurationException {
+        assertEquals(Set.of("1.20"), parse("disabled-worlds: \"1.20\"").getDisabledWorlds());
+        assertEquals(Set.of("off"), parse("disabled-worlds: \"off\"").getDisabledWorlds());
+
+        assertEquals(Set.of("1.2"), parse("disabled-worlds: 1.20").getDisabledWorlds());
+        assertTrue(parse("disabled-worlds: off").getDisabledWorlds().isEmpty());
+    }
+
+    @Test
+    void nonBooleanEnabledFallsBackToDefault() throws InvalidConfigurationException {
+        WildlifeConfig config = parse("""
+                animals:
+                  deer:
+                    enabled: "false"
+                  boar:
+                    enabled: maybe
+                """);
+
+        assertEquals(WildlifeConfig.DEFAULT_ENABLED, config.getAnimal("deer").orElseThrow().enabled());
+        assertEquals(WildlifeConfig.DEFAULT_ENABLED, config.getAnimal("boar").orElseThrow().enabled());
+    }
+
     /**
      * Parses {@code liveYaml} with a jar config installed as its defaults, the way {@code JavaPlugin.getConfig()}
      * hands config.yml to {@link WildlifeConfig#from}. The jar values differ from the code's defaults so that a
