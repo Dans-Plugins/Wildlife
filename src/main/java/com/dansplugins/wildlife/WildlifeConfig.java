@@ -31,7 +31,7 @@ public final class WildlifeConfig {
 
     /**
      * Parses the configuration. Missing keys fall back to their defaults, a spawn chance outside
-     * [0.0, 1.0] is clamped into that range, and a list key given as a single string is read as one entry.
+     * [0.0, 1.0] is clamped into that range, and a list key given as a single value is read as one entry.
      */
     public static WildlifeConfig from(ConfigurationSection config) {
         Map<String, AnimalSettings> animals = new LinkedHashMap<>();
@@ -66,11 +66,16 @@ public final class WildlifeConfig {
     }
 
     /**
-     * Reads a list key, treating a single string as a one-entry list. {@code getStringList} alone returns an
-     * empty list for {@code disabled-worlds: world_nether}, which would silently leave the roster on there.
+     * Reads a list key, treating a single string or number as a one-entry list. {@code getStringList} alone
+     * returns an empty list for {@code disabled-worlds: world_nether}, which would silently leave the roster on
+     * there. Numbers are included because YAML reads {@code disabled-worlds: 2024} as one, and
+     * {@code getStringList} already converts number entries inside a list.
      */
     private static List<String> readStringList(ConfigurationSection section, String key) {
-        return section.isString(key) ? List.of(section.getString(key)) : section.getStringList(key);
+        Object value = section.get(key);
+        return value instanceof String || value instanceof Number
+                ? List.of(value.toString())
+                : section.getStringList(key);
     }
 
     /** Lower-cases a key and strips a leading {@code minecraft:} namespace. */

@@ -11,3 +11,4 @@ All notable changes to this project are documented in this file. The format is b
 ### Fixed
 
 - `disabled-worlds` and `biomes` given as a single value without list brackets, such as `disabled-worlds: world_nether`, are now read as a one-entry list instead of being silently ignored.
+- A single numeric value without list brackets, such as `disabled-worlds: 2024`, is now read the same way instead of being silently ignored.
