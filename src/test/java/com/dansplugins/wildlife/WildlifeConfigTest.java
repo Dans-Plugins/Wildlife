@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class WildlifeConfigTest {
@@ -397,5 +398,88 @@ class WildlifeConfigTest {
 
         assertTrue(config.getAnimals().isEmpty());
         assertTrue(config.getDisabledWorlds().isEmpty());
+    }
+
+    @Test
+    void parsedCollectionsCannotBeModified() throws InvalidConfigurationException {
+        WildlifeConfig config = parse("""
+                disabled-worlds: [world_nether]
+                animals:
+                  deer:
+                    enabled: true
+                """);
+
+        assertThrows(UnsupportedOperationException.class, () -> config.getAnimals().remove("deer"));
+        assertThrows(UnsupportedOperationException.class, () -> config.getDisabledWorlds().remove("world_nether"));
+    }
+
+    @Test
+    void infiniteSpawnChanceIsClampedRatherThanDefaulted() throws InvalidConfigurationException {
+        WildlifeConfig config = parse("""
+                animals:
+                  boar:
+                    spawn-chance: .inf
+                  crow:
+                    spawn-chance: -.inf
+                """);
+
+        assertEquals(1.0, config.getAnimal("boar").orElseThrow().spawnChance());
+        assertEquals(0.0, config.getAnimal("crow").orElseThrow().spawnChance());
+    }
+
+    @Test
+    void nestedSectionUnderAnAnimalIsNotAnotherAnimal() throws InvalidConfigurationException {
+        WildlifeConfig config = parse("""
+                animals:
+                  deer:
+                    enabled: true
+                    extra:
+                      speed: 0.3
+                """);
+
+        assertEquals(Set.of("deer"), config.getAnimals().keySet());
+    }
+
+    @Test
+    void animalIdIgnoresMinecraftPrefix() throws InvalidConfigurationException {
+        WildlifeConfig config = parse("""
+                animals:
+                  "minecraft:Deer":
+                    spawn-chance: 0.25
+                """);
+
+        assertEquals(Set.of("deer"), config.getAnimals().keySet());
+        assertEquals(0.25, config.getAnimal("minecraft:deer").orElseThrow().spawnChance());
+    }
+
+    @Test
+    void animalSectionsWithTheSameIdKeepTheLaterOne() throws InvalidConfigurationException {
+        WildlifeConfig config = parse("""
+                animals:
+                  Deer:
+                    spawn-chance: 0.1
+                  deer:
+                    spawn-chance: 0.2
+                """);
+
+        assertEquals(Set.of("deer"), config.getAnimals().keySet());
+        assertEquals(0.2, config.getAnimal("deer").orElseThrow().spawnChance());
+    }
+
+    /** Pins current behaviour: a comma-separated value without list brackets is one entry, not several. */
+    @Test
+    void commaSeparatedValueWithoutListBracketsIsOneEntry() throws InvalidConfigurationException {
+        WildlifeConfig config = parse("""
+                disabled-worlds: world_nether, world_the_end
+                animals:
+                  deer:
+                    biomes: forest, taiga
+                """);
+
+        assertEquals(Set.of("world_nether, world_the_end"), config.getDisabledWorlds());
+        assertFalse(config.isWorldDisabled("world_nether"));
+        AnimalSettings deer = config.getAnimal("deer").orElseThrow();
+        assertEquals(List.of("forest, taiga"), deer.biomes());
+        assertFalse(deer.spawnsIn("forest"));
     }
 }

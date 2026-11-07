@@ -19,7 +19,7 @@ Wildlife writes `plugins/Wildlife/config.yml` on first start. Changes take effec
 | `spawn-chance` | number, 0.0–1.0 | `0.05` | Probability used by natural spawning. Values outside 0.0–1.0 are clamped into that range; a value that is not a number falls back to the default. |
 | `biomes` | list of biome keys | `[]` | Biomes the animal spawns in naturally, e.g. `forest`. Matching ignores case and an optional `minecraft:` prefix; duplicates and blank entries are dropped. A single biome key without list brackets is read as a one-entry list. Use biome keys that exist on your server version. |
 
-Animal ids are matched case-insensitively and stored in lower case.
+Animal ids are matched case-insensitively and stored in lower case, and an optional `minecraft:` prefix is ignored. If two sections reduce to the same id, such as `Deer` and `deer`, the later one replaces the earlier one.
 
 ## Shipped defaults
 
