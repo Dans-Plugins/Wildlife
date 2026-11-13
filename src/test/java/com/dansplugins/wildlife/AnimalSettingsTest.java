@@ -3,6 +3,7 @@ package com.dansplugins.wildlife;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -31,5 +32,28 @@ class AnimalSettingsTest {
         assertTrue(deer.spawnsIn("BIRCH_FOREST"));
         assertTrue(deer.spawnsIn("minecraft:birch_forest"));
         assertFalse(deer.spawnsIn("forest"));
+    }
+
+    @Test
+    void spawnsInIgnoresSurroundingWhitespace() {
+        AnimalSettings duck = new AnimalSettings("duck", true, 0.1, List.of("river"));
+
+        assertTrue(duck.spawnsIn(" river "));
+        assertTrue(duck.spawnsIn(" minecraft:river"));
+    }
+
+    @Test
+    void animalWithNoBiomesSpawnsNowhere() {
+        AnimalSettings crow = new AnimalSettings("crow", true, 0.1, List.of());
+
+        assertFalse(crow.spawnsIn("plains"));
+        assertFalse(crow.spawnsIn(""));
+    }
+
+    @Test
+    void nullBiomeListOrEntryIsRejected() {
+        assertThrows(NullPointerException.class, () -> new AnimalSettings("deer", true, 0.1, null));
+        assertThrows(NullPointerException.class,
+                () -> new AnimalSettings("deer", true, 0.1, Arrays.asList("forest", null)));
     }
 }

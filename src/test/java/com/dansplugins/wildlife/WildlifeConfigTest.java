@@ -466,6 +466,29 @@ class WildlifeConfigTest {
         assertEquals(0.2, config.getAnimal("deer").orElseThrow().spawnChance());
     }
 
+    @Test
+    void normalizeKeyTrimsBeforeStrippingThePrefix() {
+        assertEquals("forest", WildlifeConfig.normalizeKey("  Minecraft:FOREST  "));
+        assertEquals("forest", WildlifeConfig.normalizeKey("\tforest\n"));
+    }
+
+    @Test
+    void normalizeKeyStripsTheNamespaceOnlyAtTheStart() {
+        assertEquals("other:minecraft:forest", WildlifeConfig.normalizeKey("other:minecraft:forest"));
+        assertEquals("minecraft:forest", WildlifeConfig.normalizeKey("minecraft:minecraft:forest"));
+    }
+
+    @Test
+    void bareNamespaceBiomeEntryIsDroppedAsBlank() throws InvalidConfigurationException {
+        WildlifeConfig config = parse("""
+                animals:
+                  crow:
+                    biomes: ["minecraft:", plains]
+                """);
+
+        assertEquals(List.of("plains"), config.getAnimal("crow").orElseThrow().biomes());
+    }
+
     /** Pins current behaviour: a comma-separated value without list brackets is one entry, not several. */
     @Test
     void commaSeparatedValueWithoutListBracketsIsOneEntry() throws InvalidConfigurationException {
