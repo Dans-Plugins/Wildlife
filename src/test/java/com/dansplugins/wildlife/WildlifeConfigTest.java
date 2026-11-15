@@ -238,7 +238,23 @@ class WildlifeConfigTest {
     }
 
     @Test
-    void disabledWorldNamesAreCaseSensitive() throws InvalidConfigurationException {
+    void isActiveNormalizesTheAnimalIdButNotTheWorldName() throws InvalidConfigurationException {
+        WildlifeConfig config = parse("""
+                disabled-worlds: [World_Nether]
+                animals:
+                  deer:
+                    enabled: true
+                """);
+
+        assertTrue(config.isActive("DEER", "world"));
+        assertTrue(config.isActive("minecraft:deer", "world"));
+        assertTrue(config.isActive(" Deer ", "world"));
+        assertFalse(config.isActive("DEER", "World_Nether"));
+        assertTrue(config.isActive("DEER", "world_nether"), "world names are matched exactly");
+    }
+
+    @Test
+    void disabledWorldNamesAreCaseSensitive()throws InvalidConfigurationException {
         WildlifeConfig config = parse("""
                 disabled-worlds: [World]
                 """);
