@@ -417,6 +417,40 @@ class WildlifeConfigTest {
     }
 
     @Test
+    void animalsGivenAsAPlainValueLeavesNoAnimals() throws InvalidConfigurationException {
+        WildlifeConfig config = parse("""
+                disabled-worlds: [world_nether]
+                animals: [deer, boar]
+                """);
+
+        assertTrue(config.getAnimals().isEmpty());
+        assertFalse(config.isActive("deer", "world"));
+        assertEquals(Set.of("world_nether"), config.getDisabledWorlds());
+    }
+
+    @Test
+    void animalsKeepConfigOrder() throws InvalidConfigurationException {
+        WildlifeConfig config = parse("""
+                animals:
+                  crow: {}
+                  Duck: {}
+                  boar: {}
+                  deer: {}
+                """);
+
+        assertEquals(List.of("crow", "duck", "boar", "deer"), List.copyOf(config.getAnimals().keySet()));
+    }
+
+    @Test
+    void duplicateDisabledWorldsCollapseInConfigOrder() throws InvalidConfigurationException {
+        WildlifeConfig config = parse("""
+                disabled-worlds: [world_c, world_b, world_c, world_a]
+                """);
+
+        assertEquals(List.of("world_c", "world_b", "world_a"), List.copyOf(config.getDisabledWorlds()));
+    }
+
+    @Test
     void parsedCollectionsCannotBeModified() throws InvalidConfigurationException {
         WildlifeConfig config = parse("""
                 disabled-worlds: [world_nether]
